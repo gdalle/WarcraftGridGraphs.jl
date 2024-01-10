@@ -1,0 +1,13 @@
+name = "WarcraftGridGraphs"
+uuid = "99715485-436c-46de-9958-b116d5ee026b"
+authors = ["Guillaume Dalle"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1.10"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
