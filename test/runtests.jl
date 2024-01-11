@@ -4,7 +4,7 @@ using JuliaFormatter
 using WarcraftGridGraphs
 using Test
 
-@testset "WarcraftGridGraphs.jl" begin
+@testset verbose = true "WarcraftGridGraphs.jl" begin
     @testset "Formalities" begin
         @test JuliaFormatter.format(WarcraftGridGraphs)
         Aqua.test_all(WarcraftGridGraphs)

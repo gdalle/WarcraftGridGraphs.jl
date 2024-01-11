@@ -11,39 +11,34 @@ function warcraft_grid_graph(costs::AbstractMatrix{R}; acyclic::Bool=false) wher
     V = h * w
     E = count_edges(h, w; acyclic)
 
-    colptr = Int[]
-    rowval = Int[]
-    nzval = R[]
-    sizehint!(colptr, V + 1)
-    sizehint!(rowval, E)
-    sizehint!(nzval, E)
+    sources = Int[]
+    destinations = Int[]
+    weights = R[]
 
-    k = 1
+    sizehint!(sources, E)
+    sizehint!(destinations, E)
+    sizehint!(weights, E)
+
     for v1 in 1:V
-        push!(colptr, k)
         i1, j1 = index_to_coord(v1, h, w)
         for Δi in (-1, 0, 1), Δj in (-1, 0, 1)
-            valid_step = Δi != 0 || Δj != 0
-            if acyclic
-                valid_step = valid_step && Δi >= 0 && Δj >= 0
+            i2, j2 = i1 + Δi, j1 + Δj
+            valid_destination = 1 <= i2 <= h && 1 <= j2 <= w
+            valid_step = if acyclic
+                (Δi != 0 || Δj != 0) && Δi >= 0 && Δj >= 0
+            else
+                (Δi != 0 || Δj != 0)
             end
-            if valid_step
-                i2 = i1 + Δi
-                j2 = j1 + Δj
-                valid_destination = 1 <= i2 <= h && 1 <= j2 <= w
-                if valid_destination
-                    v2 = coord_to_index(i2, j2, h, w)
-                    push!(rowval, v2)
-                    push!(nzval, costs[v2])
-                    k += 1
-                end
+            if valid_destination && valid_step
+                v2 = coord_to_index(i2, j2, h, w)
+                push!(sources, v1)
+                push!(destinations, v2)
+                push!(weights, costs[v2])
             end
         end
     end
-    push!(colptr, k)
 
-    weights = transpose(SparseMatrixCSC(V, V, colptr, rowval, nzval))
-    return SimpleWeightedDiGraph(weights)
+    return SimpleWeightedDiGraph(sources, destinations, weights)
 end
 
 function count_edges(h::Integer, w::Integer; acyclic::Bool)
